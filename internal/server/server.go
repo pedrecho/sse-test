@@ -8,8 +8,13 @@ import (
 
 func Run() error {
 
-	controller := controllers.NewController(msg.NewMsgChan())
+	controller, err := controllers.NewController(msg.NewMsgChan())
+	if err != nil {
+		return err
+	}
+	defer controller.Shutdown()
 
+	http.HandleFunc("/task", controller.SseHandler)
 	http.HandleFunc("/report", controller.Report)
 
 	http.ListenAndServe(":8080", nil)
